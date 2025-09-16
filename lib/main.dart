@@ -50,7 +50,32 @@ class _FlutterBleAppState extends State<FlutterBleApp> {
       color: Colors.lightBlue,
       debugShowCheckedModeBanner: false,
       home: screen,
-      //navigatorObservers: [BluetoothAdapterStateObserver()],
+      navigatorObservers: [BluetoothAdapterStateObserver()],
     );
+  }
+}
+
+class BluetoothAdapterStateObserver extends NavigatorObserver {
+  StreamSubscription<BluetoothAdapterState>? _adapterStateSubscription;
+
+  @override
+  void didPush(Route route, Route? previousRoute) {
+    super.didPush(route, previousRoute);
+
+    if(route.settings.name == '/DeviceScreen'){
+      _adapterStateSubscription ??= FlutterBluePlus.adapterState.listen((state){
+        if(state != BluetoothAdapterState.on){
+          navigator?.pop();
+        }
+      });
+    }
+  }
+
+  @override
+  void didPop(Route route, Route? previousRoute) {    
+    super.didPop(route, previousRoute);
+
+    _adapterStateSubscription?.cancel();
+    _adapterStateSubscription = null;
   }
 }
