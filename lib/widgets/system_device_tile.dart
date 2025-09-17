@@ -24,10 +24,37 @@ class _SystemDeviceTile extends State<SystemDeviceTile>{
 
   late StreamSubscription<BluetoothConnectionState> _connectionStateSubscription;
 
+   @override
+  void initState() {
+    super.initState();
+
+    _connectionStateSubscription = widget.device.connectionState.listen((state) {
+      _connectionState = state;
+      if (mounted) {
+        setState(() {});
+      }
+    });
+  }
 
   @override
+  void dispose() {
+    _connectionStateSubscription.cancel();
+    super.dispose();
+  }
+
+  bool get isConnected {
+    return _connectionState == BluetoothConnectionState.connected;
+  }
+  
+  @override
   Widget build(BuildContext context) {
-    // TODO: implement build
-    throw UnimplementedError();
+    return ListTile(
+      title: Text(widget.device.platformName),
+      subtitle: Text(widget.device.remoteId.str),
+      trailing: ElevatedButton(
+        onPressed: isConnected ? widget.onOpen : widget.onConnect,
+        child: isConnected ? const Text('OPEN') : const Text('CONNECT'),
+      ),
+    );
   }  
 }
